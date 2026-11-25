@@ -1,1 +1,543 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>THE WORD — From Creation to Eternity</title>
+<style>
+:root {
+  color-scheme: dark;
+  --gold: #d4b779;
+  --green: #b9d4ac;
+  --muted: #899582;
+  --bg: #101410;
+  --panel: #181e18;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--green);
+  font-family: Georgia, serif;
+}
+header {
+  text-align: center;
+  padding: 30px 15px 20px;
+  border-bottom: 1px solid #394237;
+}
+h1 {
+  color: var(--gold);
+  letter-spacing: 9px;
+  font-size: 38px;
+  margin: 0;
+}
+.subtitle {
+  color: var(--muted);
+  letter-spacing: 3px;
+  font-size: 12px;
+  margin-top: 12px;
+}
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding: 15px;
+}
+button {
+  background: #222b21;
+  border: 1px solid #465443;
+  color: var(--green);
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+button:hover { border-color: var(--gold); }
+main {
+  max-width: 1000px;
+  margin: auto;
+  padding: 15px;
+}
+.status {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  color: var(--gold);
+  font: 12px monospace;
+  padding: 15px;
+  background: var(--panel);
+  border: 1px solid #394237;
+}
+#terminal {
+  height: 55vh;
+  min-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #394237;
+  padding: 24px;
+  line-height: 1.8;
+  font-size: 17px;
+  white-space: pre-wrap;
+}
+.entry { margin-bottom: 18px; }
+.player {
+  color: var(--gold);
+  font-family: monospace;
+}
+.scripture { color: #e3c992; }
+.system {
+  color: var(--muted);
+  font: 13px/1.7 monospace;
+}
+form {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+input {
+  flex: 1;
+  min-width: 0;
+  background: #151b15;
+  border: 1px solid #465443;
+  color: var(--green);
+  padding: 15px;
+  font: 16px monospace;
+}
+footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 25px;
+  line-height: 1.8;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>THE WORD</h1>
+  <div class="subtitle">FROM CREATION TO ETERNITY</div>
+</header>
+
+<nav>
+  <button onclick="command('look')">Journey</button>
+  <button onclick="command('read')">Scripture</button>
+  <button onclick="command('crossref')">Cross-references</button>
+  <button onclick="command('loom')">The Loom</button>
+  <button onclick="command('journal')">Journal</button>
+  <button onclick="command('help')">Help</button>
+  <button onclick="command('support')">Support</button>
+</nav>
+
+<main>
+  <div class="status">
+    <span id="location"></span>
+    <span id="role"></span>
+    <span id="progress"></span>
+  </div>
+
+  <div id="terminal" role="log" aria-live="polite"></div>
+
+  <form id="commandForm">
+    <input id="input" autocomplete="off"
+      placeholder="What will you do?"
+      aria-label="Adventure command">
+    <button type="submit">Enter</button>
+  </form>
+</main>
+
+<footer>
+  Freely ye have received, freely give. — Matthew 10:8
+  <br>
+  THE WORD • Development Preview 0.1
+  <br>
+  KJV gameplay • Geneva / Septuagint verification planned
+</footer>
+
+<script>
+const scenes = [
+  {
+    id: "creation",
+    title: "The Beginning",
+    ref: "Genesis 1:3",
+    role: "Witness of Creation",
+    story: "Darkness is upon the face of the deep. The earth is without form, and void. The Spirit of God moves upon the face of the waters.",
+    question: "What does God command to appear?",
+    advanced: "What appears at God's command before the sun and moon are appointed?",
+    verse: "And God said, Let there be light: and there was light.",
+    answers: ["light"],
+    hint: "Genesis 1:3. Consider what appears on the first day.",
+    links: ["John 1:1-5", "2 Corinthians 4:6"],
+    next: 1
+  },
+  {
+    id: "word",
+    title: "The Word",
+    ref: "John 1:1",
+    role: "Reader of John's Gospel",
+    story: "The darkness fades. You find yourself examining a scroll. Its opening words remind you of the beginning of Genesis.",
+    question: "Who or what was in the beginning with God?",
+    advanced: "Identify what John declares was with God and was God in the beginning.",
+    verse: "In the beginning was the Word, and the Word was with God, and the Word was God.",
+    answers: ["word", "jesus", "christ"],
+    hint: "John begins with the same phrase as Genesis.",
+    links: ["Genesis 1:1", "John 1:14"],
+    next: 2
+  },
+  {
+    id: "eden",
+    title: "The Garden",
+    ref: "Genesis 2:17",
+    role: "Adam",
+    story: "You stand in Eden. Trees bearing fruit surround you. God has given you permission to eat freely, with one exception.",
+    question: "Which tree must you not eat from?",
+    advanced: "Identify the forbidden tree and recall the consequence God attached to eating from it.",
+    verse: "But of the tree of the knowledge of good and evil, thou shalt not eat of it: for in the day that thou eatest thereof thou shalt surely die.",
+    answers: ["knowledge of good and evil"],
+    hint: "Read Genesis 2:17.",
+    links: ["Genesis 3:6", "Romans 6:23", "James 1:15"],
+    next: 3
+  },
+  {
+    id: "rome",
+    title: "The Wages of Sin",
+    ref: "Romans 6:23",
+    role: "Believer in Rome",
+    story: "Centuries pass. A letter from Paul lies before you. Its words recall the warning given in Eden.",
+    question: "What are the wages of sin?",
+    advanced: "Recall the consequence of sin that Paul contrasts with God's gift of eternal life.",
+    verse: "For the wages of sin is death; but the gift of God is eternal life through Jesus Christ our Lord.",
+    answers: ["death"],
+    hint: "Remember God's warning in Eden.",
+    links: ["Genesis 2:17", "Romans 5:12", "James 1:15"],
+    next: 4
+  },
+  {
+    id: "abel",
+    title: "The Blood of Abel",
+    ref: "Genesis 4:10",
+    role: "Witness",
+    story: "You return to the early generations of mankind. Abel has been slain. The LORD speaks to Cain.",
+    question: "What cries out to God from the ground?",
+    advanced: "Identify what cries from the ground and consider its later contrast in Hebrews 12:24.",
+    verse: "And he said, What hast thou done? the voice of thy brother's blood crieth unto me from the ground.",
+    answers: ["blood"],
+    hint: "Genesis 4:10.",
+    links: ["Hebrews 11:4", "Hebrews 12:24"],
+    next: 5
+  },
+  {
+    id: "noah",
+    title: "The Coming Flood",
+    ref: "Genesis 6:14",
+    role: "Noah",
+    story: "The earth is filled with violence. God has given you instructions to prepare for a coming flood.",
+    question: "What kind of wood must you use to build the ark?",
+    advanced: "Identify the material specifically named in God's instructions for the ark.",
+    verse: "Make thee an ark of gopher wood; rooms shalt thou make in the ark, and shalt pitch it within and without with pitch.",
+    answers: ["gopher"],
+    hint: "Genesis 6:14 names the wood.",
+    links: ["Hebrews 11:7", "Matthew 24:37-39", "1 Peter 3:20"],
+    next: 6
+  },
+  {
+    id: "abraham",
+    title: "The Promised Sacrifice",
+    ref: "Genesis 22:8",
+    role: "Abraham",
+    story: "You ascend toward Moriah with Isaac. He sees the fire and the wood, but asks where the lamb is.",
+    question: "What will you tell Isaac?",
+    advanced: "Recall Abraham's words concerning who will provide the sacrifice.",
+    verse: "And Abraham said, My son, God will provide himself a lamb for a burnt offering: so they went both of them together.",
+    answers: ["god will provide", "lord will provide", "god provides"],
+    hint: "Genesis 22:8.",
+    links: ["John 1:29", "Hebrews 11:17-19"],
+    next: 7
+  },
+  {
+    id: "passover",
+    title: "The Passover",
+    ref: "Exodus 12:13",
+    role: "Israelite in Egypt",
+    story: "Night approaches in Egypt. Your household has prepared the Passover lamb. You must mark your dwelling according to God's instructions.",
+    question: "What must be placed upon the doorway?",
+    advanced: "Identify the token upon the houses that God says He will see.",
+    verse: "And the blood shall be to you for a token upon the houses where ye are: and when I see the blood, I will pass over you.",
+    answers: ["blood"],
+    hint: "Exodus 12:7-13.",
+    links: ["1 Corinthians 5:7", "John 19:36"],
+    next: 8
+  },
+  {
+    id: "serpent",
+    title: "The Wilderness",
+    ref: "Numbers 21:9",
+    role: "Israelite",
+    story: "Fiery serpents have come among the people. Moses has raised something upon a pole.",
+    question: "What must you look upon to live?",
+    advanced: "Identify the object Moses raised that Jesus later references in John 3:14.",
+    verse: "And Moses made a serpent of brass, and put it upon a pole.",
+    answers: ["serpent", "snake"],
+    hint: "Numbers 21:8-9.",
+    links: ["John 3:14-15", "2 Kings 18:4"],
+    next: 9
+  },
+  {
+    id: "corinth",
+    title: "The Divided Church",
+    ref: "1 Corinthians 12:27",
+    role: "Corinthian representative",
+    story: "The brethren disagree concerning their importance within the church. You must remind them of their relationship to one another.",
+    question: "What does Paul call the believers collectively?",
+    advanced: "Identify Paul's image of unity that allows many distinct members to belong together.",
+    verse: "Now ye are the body of Christ, and members in particular.",
+    answers: ["body of christ", "one body"],
+    hint: "1 Corinthians 12:27.",
+    links: ["Romans 12:4-5", "Ephesians 4:4"],
+    next: 10
+  },
+  {
+    id: "return",
+    title: "The Return of the King",
+    ref: "Revelation 19:16",
+    role: "Reader of Revelation",
+    story: "You arrive at the closing visions of Scripture. Heaven is opened, and a rider upon a white horse appears.",
+    question: "What title is written upon His vesture and thigh?",
+    advanced: "Recall the two royal titles given together in Revelation 19:16.",
+    verse: "And he hath on his vesture and on his thigh a name written, KING OF KINGS, AND LORD OF LORDS.",
+    answers: ["king of kings and lord of lords", "king of kings lord of lords"],
+    hint: "Revelation 19:16.",
+    links: ["1 Timothy 6:15", "Revelation 17:14"],
+    next: null
+  }
+];
+
+const fresh = () => ({
+  scene: 0,
+  difficulty: 2.8,
+  completed: [],
+  discovered: [],
+  journal: [],
+  attempts: 0,
+  correct: 0,
+  hinted: false,
+  finished: false
+});
+
+let state = fresh();
+
+try {
+  const saved = localStorage.getItem("the-word-v01");
+  if (saved) state = {...fresh(), ...JSON.parse(saved)};
+} catch(e) {}
+
+const terminal = document.getElementById("terminal");
+const input = document.getElementById("input");
+
+function print(text, type = "") {
+  const div = document.createElement("div");
+  div.className = "entry " + type;
+  div.textContent = text;
+  terminal.appendChild(div);
+  terminal.scrollTop = terminal.scrollHeight;
+}
+
+function save() {
+  try {
+    localStorage.setItem("the-word-v01", JSON.stringify(state));
+  } catch(e) {
+    print("Browser storage is unavailable.", "system");
+  }
+}
+
+function update() {
+  const scene = scenes[state.scene];
+  document.getElementById("location").textContent =
+    scene.ref.toUpperCase();
+  document.getElementById("role").textContent =
+    "ROLE: " + scene.role;
+  document.getElementById("progress").textContent =
+    state.completed.length + "/" + scenes.length + " SCENES";
+  save();
+}
+
+function showScene() {
+  const scene = scenes[state.scene];
+  print("\n" + scene.title.toUpperCase(), "scripture");
+  print(scene.story);
+  print(state.difficulty >= 5 ? scene.advanced : scene.question);
+  update();
+}
+
+function normalize(text) {
+  return text.toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .replace(/\s+/g, " ").trim();
+}
+
+function command(raw) {
+  raw = raw.trim();
+  if (!raw) return;
+
+  const c = normalize(raw);
+  const scene = scenes[state.scene];
+
+  print("> " + raw, "player");
+
+  if (c === "help") {
+    print("LOOK — Examine your scene\nREAD — Consult Scripture\nHINT — Receive guidance\nCROSSREF — Discover related passages\nTRAVEL [reference] — Visit an available scene\nLOOM — View discovered connections\nDISCOVER [idea] — Record a research proposal\nJOURNAL — Review progress\nSPEAK — Hear the current Scripture\nSAVE — Save your journey\nRESTART — Begin again\n\nOr type your answer naturally.", "system");
+  }
+
+  else if (c === "look") {
+    showScene();
+  }
+
+  else if (c === "read") {
+    state.hinted = true;
+    print(scene.verse + "\n— " + scene.ref, "scripture");
+  }
+
+  else if (c === "hint") {
+    state.hinted = true;
+    print(scene.hint, "system");
+  }
+
+  else if (c === "crossref") {
+    scene.links.forEach(ref => {
+      const edge = scene.ref + " → " + ref;
+      if (!state.discovered.includes(edge))
+        state.discovered.push(edge);
+      print(edge, "scripture");
+    });
+    print("These are curated starter connections. Some destinations are not yet playable.", "system");
+  }
+
+  else if (c.startsWith("travel ")) {
+    const destination = c.slice(7);
+    const target = scenes.findIndex(s =>
+      normalize(s.ref) === destination ||
+      normalize(s.title) === destination
+    );
+    if (target >= 0) {
+      state.scene = target;
+      state.hinted = false;
+      showScene();
+    } else {
+      print("That destination is not yet playable.");
+    }
+  }
+
+  else if (c === "loom") {
+    print("THE LOOM — Your personal Scripture network", "scripture");
+    print(state.discovered.length ?
+      state.discovered.join("\n") :
+      "No connections recorded. Try CROSSREF.");
+  }
+
+  else if (c === "journal") {
+    print("Scenes completed: " + state.completed.length +
+      "\nConnections discovered: " + state.discovered.length +
+      "\nResearch proposals: " + state.journal.length +
+      "\nEstimated difficulty: " + state.difficulty.toFixed(2),
+      "system");
+    if (state.journal.length)
+      print(state.journal.join("\n\n"));
+  }
+
+  else if (c.startsWith("discover ")) {
+    state.journal.push(raw.slice(9));
+    print("Research proposal saved locally. Awaiting future Scriptural verification.", "system");
+  }
+
+  else if (c === "support") {
+    print("THE WORD is free. No payment is required to play.\n\nVoluntary support will help sustain development and its creator. Payment links have not yet been configured.\n\nGod loveth a cheerful giver. — 2 Corinthians 9:7", "scripture");
+  }
+
+  else if (c === "speak") {
+    if ("speechSynthesis" in window) {
+      const speech = new SpeechSynthesisUtterance(scene.verse);
+      speech.rate = 0.9;
+      window.speechSynthesis.speak(speech);
+      state.hinted = true;
+    } else {
+      print("Audio narration is unavailable in this browser.");
+    }
+  }
+
+  else if (c === "save") {
+    save();
+    print("Journey saved in this browser.", "system");
+  }
+
+  else if (c === "restart") {
+    if (confirm("Erase local progress and begin again?")) {
+      state = fresh();
+      terminal.textContent = "";
+      showScene();
+    }
+  }
+
+  else if (c === "compare") {
+    print("Geneva and Septuagint source databases have not yet been imported. Textual verification is pending.", "system");
+  }
+
+  else {
+    state.attempts++;
+
+    const negative = /\b(not|never|isnt|dont)\b/.test(c);
+    const correct = !negative &&
+      scene.answers.some(answer =>
+        c.includes(normalize(answer))
+      );
+
+    if (correct) {
+      state.correct++;
+      state.difficulty = Math.min(10,
+        state.difficulty + (state.hinted ? 0.08 : 0.42));
+
+      if (!state.completed.includes(scene.id))
+        state.completed.push(scene.id);
+
+      scene.links.forEach(ref => {
+        const edge = scene.ref + " → " + ref;
+        if (!state.discovered.includes(edge))
+          state.discovered.push(edge);
+      });
+
+      print(scene.verse + "\n— " + scene.ref, "scripture");
+      print("A thread of Scripture has been revealed.", "system");
+
+      state.hinted = false;
+
+      if (scene.next !== null) {
+        state.scene = scene.next;
+        showScene();
+      } else {
+        state.finished = true;
+        print("You have reached the final scene of this preview.\n\nYour journey through Scripture is only beginning.\nUse TRAVEL to revisit scenes, or LOOM to review your connections.", "scripture");
+      }
+    } else {
+      state.difficulty = Math.max(1, state.difficulty - 0.18);
+      print("That response does not match a recognized solution. Investigate further, or try READ or HINT. Alternative interpretations can be recorded using DISCOVER.");
+    }
+  }
+
+  update();
+  input.focus();
+}
+
+document.getElementById("commandForm")
+  .addEventListener("submit", event => {
+    event.preventDefault();
+    const value = input.value;
+    input.value = "";
+    command(value);
+  });
+
+print("Welcome to THE WORD.", "scripture");
+print("Journey through Scripture. Investigate its connections. Discover its treasures.");
+print("Type HELP at any time. Scene descriptions are dramatizations; quoted passages use KJV wording.", "system");
+showScene();
+</script>
+</body>
+</html>
